@@ -1,4 +1,5 @@
 ﻿using MainApplication.Models;
+using MainApplication.ServiceBus;
 using System;
 using System.Linq;
 
@@ -7,6 +8,8 @@ namespace MainApplication.DAL
     public class StudentRepository : IDisposable
     {
         private SchoolContext db = new SchoolContext();
+        private IServiceBusPublishService serviceBusPublisheService = new ServiceBusPublishService();
+        private const string serviceBusTopic = "domainevents";
 
         public Student[] GetAll()
         {
@@ -22,6 +25,7 @@ namespace MainApplication.DAL
         {
             db.Students.Add(student);
             db.SaveChanges();
+            serviceBusPublisheService.Send(new StudentChangedEvent { StudentId = student.ID }, serviceBusTopic);
         }
 
         public void Edit(Student student)
@@ -31,6 +35,7 @@ namespace MainApplication.DAL
             studentToUpdate.FirstMidName = student.FirstMidName;
             studentToUpdate.LastName = student.LastName;
             db.SaveChanges();
+            serviceBusPublisheService.Send(new StudentChangedEvent { StudentId = student.ID }, serviceBusTopic);
         }
 
         public void AddCourseResult(Enrollment[] enrollments)
