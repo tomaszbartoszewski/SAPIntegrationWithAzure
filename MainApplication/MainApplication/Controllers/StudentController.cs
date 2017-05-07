@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Data.Entity;
-using System.Linq;
+﻿using System.Data;
 using System.Net;
-using System.Web;
 using System.Web.Mvc;
 using MainApplication.DAL;
 using MainApplication.Models;
@@ -13,12 +8,12 @@ namespace MainApplication.Controllers
 {
     public class StudentController : Controller
     {
-        private SchoolContext db = new SchoolContext();
+        private StudentRepository studentRepository = new StudentRepository();
 
         // GET: Student
         public ActionResult Index()
         {
-            return View(db.Students.ToList());
+            return View(studentRepository.GetAll());
         }
 
         // GET: Student/Details/5
@@ -28,7 +23,7 @@ namespace MainApplication.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Student student = db.Students.Find(id);
+            Student student = studentRepository.Get(id);
             if (student == null)
             {
                 return HttpNotFound();
@@ -53,8 +48,7 @@ namespace MainApplication.Controllers
             {
                 if (ModelState.IsValid)
                 {
-                    db.Students.Add(student);
-                    db.SaveChanges();
+                    studentRepository.Add(student);
                     return RedirectToAction("Index");
                 }
             }
@@ -73,7 +67,7 @@ namespace MainApplication.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Student student = db.Students.Find(id);
+            Student student = studentRepository.Get(id);
             if (student == null)
             {
                 return HttpNotFound();
@@ -90,13 +84,13 @@ namespace MainApplication.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            var studentToUpdate = db.Students.Find(id);
+            var studentToUpdate = new Student { ID = id.Value };
             if (TryUpdateModel(studentToUpdate, "",
                new string[] { "LastName", "FirstMidName", "EnrollmentDate" }))
             {
                 try
                 {
-                    db.SaveChanges();
+                    studentRepository.Edit(studentToUpdate);
 
                     return RedirectToAction("Index");
                 }
@@ -116,7 +110,7 @@ namespace MainApplication.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Student student = db.Students.Find(id);
+            Student student = studentRepository.Get(id);
             if (student == null)
             {
                 return HttpNotFound();
@@ -129,9 +123,7 @@ namespace MainApplication.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id)
         {
-            Student student = db.Students.Find(id);
-            db.Students.Remove(student);
-            db.SaveChanges();
+            studentRepository.Remove(id);
             return RedirectToAction("Index");
         }
 
@@ -139,7 +131,7 @@ namespace MainApplication.Controllers
         {
             if (disposing)
             {
-                db.Dispose();
+                studentRepository.Dispose();
             }
             base.Dispose(disposing);
         }
