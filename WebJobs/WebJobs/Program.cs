@@ -2,8 +2,6 @@
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.ServiceBus;
 using Microsoft.Azure.WebJobs.Host;
-using System.Configuration;
-using Microsoft.Azure;
 
 namespace OutboundStudent
 {
@@ -21,7 +19,7 @@ namespace OutboundStudent
                 config.UseDevelopmentSettings();
             }
 
-            ServiceBusConfiguration serviceBusConfiguration = new ServiceBusConfiguration { ConnectionString = GetSetting("Microsoft.ServiceBus.ConnectionString") };
+            ServiceBusConfiguration serviceBusConfiguration = new ServiceBusConfiguration { ConnectionString = SettingsHelper.GetSetting("Microsoft.ServiceBus.ConnectionString") };
             serviceBusConfiguration.MessageOptions.AutoRenewTimeout = TimeSpan.FromMinutes(5);
 
             config.UseServiceBus(serviceBusConfiguration);
@@ -29,17 +27,6 @@ namespace OutboundStudent
             var host = new JobHost(config);
             // The following code ensures that the WebJob will be running continuously
             host.RunAndBlock();
-        }
-
-        public static string GetSetting(string key)
-        {
-#if DEBUG
-            var value = ConfigurationManager.AppSettings.Get(key);
-#else
-            var value = CloudConfigurationManager.GetSetting(key);
-#endif
-            if (value == null) throw new ConfigurationErrorsException($"No value configured for key: '{key}'");
-            return value;
         }
     }
 }

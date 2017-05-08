@@ -5,8 +5,6 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using HandlebarsDotNet;
 using Microsoft.WindowsAzure.Storage;
-using System.Configuration;
-using Microsoft.Azure;
 
 namespace OutboundStudent
 {
@@ -20,8 +18,8 @@ namespace OutboundStudent
             var student = GetStudentInformation(message.StudentId);
             log.WriteLine($"Student: {student.FirstMidName} {student.LastName}");
             var fileContent = GenerateFileContent(student);
+            SaveFileToTheBlobStorage($"OutboundStudent_{DateTime.UtcNow.ToString("yyyyMMddHmmss")}", fileContent);
         }
-
 
         private static Student GetStudentInformation(int studentId)
         {
@@ -58,24 +56,14 @@ namespace OutboundStudent
             return result;
         }
 
-        //private static void SaveFileToTheBlobStorage(string fileName, string content)
-        //{
-        //    var account = CloudStorageAccount.Parse(GetSetting("StorageConnectionString"));
-        //    var blobClient = account.CreateCloudBlobClient();
-        //    var container = blobClient.GetContainerReference("outbound");
-
-        //}
-
-
-        public static string GetSetting(string key)
+        private static void SaveFileToTheBlobStorage(string fileName, string content)
         {
-#if DEBUG
-            var value = ConfigurationManager.AppSettings.Get(key);
-#else
-            var value = CloudConfigurationManager.GetSetting(key);
-#endif
-            if (value == null) throw new ConfigurationErrorsException($"No value configured for key: '{key}'");
-            return value;
+            var account = CloudStorageAccount.Parse(SettingsHelper.GetSetting("StorageConnectionString"));
+            var blobClient = account.CreateCloudBlobClient();
+            var container = blobClient.GetContainerReference("outbound");
+            container.CreateIfNotExists();
+            var file = container.GetBlockBlobReference(fileName);
+            file.UploadText(content);
         }
     }
 
