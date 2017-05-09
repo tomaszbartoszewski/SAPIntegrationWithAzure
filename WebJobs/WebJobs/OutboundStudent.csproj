@@ -88,9 +88,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="FormatCustomHelper.cs" />
+    <Compile Include="GradeInbound.cs" />
     <Compile Include="HttpResponseMessageExtensions.cs" />
+    <Compile Include="OutboundStudent.cs" />
     <Compile Include="Program.cs" />
-    <Compile Include="Functions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SettingsHelper.cs" />
   </ItemGroup>

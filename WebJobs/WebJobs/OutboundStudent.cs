@@ -8,7 +8,7 @@ using Microsoft.WindowsAzure.Storage;
 
 namespace OutboundStudent
 {
-    public class Functions
+    public class OutboundStudent
     {
         // This function will get triggered/executed when a new message is written 
         // on an Azure Queue called queue.
@@ -18,18 +18,20 @@ namespace OutboundStudent
             var student = GetStudentInformation(message.StudentId);
             log.WriteLine($"Student: {student.FirstMidName} {student.LastName}");
             var fileContent = GenerateFileContent(student);
-            SaveFileToTheBlobStorage($"OutboundStudent_{DateTime.UtcNow.ToString("yyyyMMddHmmss")}", fileContent);
+            var fileName = $"OutboundStudent_{DateTime.UtcNow.ToString("yyyyMMddHmmss")}";
+            SaveFileToTheBlobStorage(fileName, fileContent);
+            log.WriteLine($"File saved {fileName}");
         }
 
         private static Student GetStudentInformation(int studentId)
         {
             HttpClient client = new HttpClient();
-            client.BaseAddress = new Uri("http://mainapplication20170507091516.azurewebsites.net/api/student");
+            client.BaseAddress = new Uri(SettingsHelper.GetSetting("ApiUri"));
 
             client.DefaultRequestHeaders.Accept.Add(
             new MediaTypeWithQualityHeaderValue("application/json"));
 
-            HttpResponseMessage response = client.GetAsync($"?id={studentId}").Result;
+            HttpResponseMessage response = client.GetAsync($"api/student?id={studentId}").Result;
             if (response.IsSuccessStatusCode)
             {
                 var dataObjects = response.GetBodyFromJsonAsync<Student>().Result;
@@ -58,7 +60,7 @@ namespace OutboundStudent
 
         private static void SaveFileToTheBlobStorage(string fileName, string content)
         {
-            var account = CloudStorageAccount.Parse(SettingsHelper.GetSetting("StorageConnectionString"));
+            var account = CloudStorageAccount.Parse(SettingsHelper.GetConnectionString("AzureWebJobsStorage"));
             var blobClient = account.CreateCloudBlobClient();
             var container = blobClient.GetContainerReference("outbound");
             container.CreateIfNotExists();

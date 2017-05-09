@@ -43,9 +43,16 @@ namespace MainApplication.DAL
             foreach (var studentEnrollment in enrollments.GroupBy(e => e.StudentID))
             {
                 var student = db.Students.Find(studentEnrollment.Key);
+                var enr = student.Enrollments.ToList();
                 student.Enrollments.Clear();
+                foreach (var e in enr)
+                {
+                    db.Enrollments.Remove(e);
+                }
                 foreach (var e in studentEnrollment)
-                    student.Enrollments.Add(e);
+                {
+                    db.Enrollments.Add(e);
+                }
             }
 
             db.SaveChanges();
