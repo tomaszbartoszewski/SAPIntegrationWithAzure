@@ -102,7 +102,7 @@
     </None>
     <None Include="packages.config" />
     <None Include="Properties\PublishProfiles\MainApplication20170507091516 - Web Deploy.pubxml" />
-    <None Include="Properties\webjob-publish-settings.json" />
+    <None Include="Properties\PublishProfiles\SAPIntegration222 - Web Deploy.pubxml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Microsoft.Web.WebJobs.Publish.1.0.12\tools\webjobs.targets" Condition="Exists('..\packages\Microsoft.Web.WebJobs.Publish.1.0.12\tools\webjobs.targets')" />
